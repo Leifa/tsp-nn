@@ -16,11 +16,18 @@ class Algo:
         self.calculate_distances()
         self.tour = [0]
         self.phase = PHASE_NEAREST_NEIGHBOR
+        self.swapstack = []
 
     def calculate_distances(self):
         for i in range(self.dim):
             for j in range(self.dim):
                 self.distances[i][j] = distance(self.points[i], self.points[j])
+
+    def get_tour_distance(self):
+        result = 0
+        for i in range(len(self.tour)-1):
+            result += self.distances[self.tour[i]][self.tour[i+1]]
+        return result
 
     def step(self):
         if self.phase == PHASE_NEAREST_NEIGHBOR:
@@ -68,5 +75,19 @@ class Algo:
         if best_index == None:
             self.phase = PHASE_DONE
         else:
+            self.swapstack.append(best_index) 
             i, j = best_index 
             self.tour[i+1:j+1] = self.tour[i+1:j+1][::-1]
+
+    def unstep(self):
+        if self.phase == PHASE_DONE:
+            self.phase = PHASE_IMPROVE
+        if self.phase == PHASE_IMPROVE:
+            if len(self.swapstack) > 0:
+                i, j = self.swapstack.pop() 
+                self.tour[i+1:j+1] = self.tour[i+1:j+1][::-1]
+            else:
+                self.phase = PHASE_NEAREST_NEIGHBOR
+        if self.phase == PHASE_NEAREST_NEIGHBOR:
+            if len(self.tour) > 1:
+                self.tour.pop()
