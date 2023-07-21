@@ -2,7 +2,7 @@ import pygame
 import math
 from pygame.locals import *
 import random
-from algo import *
+from mini import *
 
 # Initialize pygame
 pygame.display.init()
@@ -26,7 +26,7 @@ font = pygame.font.Font(None, 30)
 
 # List of points
 points = []
-for i in range(130):
+for i in range(10):
     point = (random.randint(100, width-100), random.randint(100, height-100))
     points.append(point)
 #points = [(110, 120), (400, 510), (600, 550), (900, 600), (630, 42)]
@@ -54,10 +54,6 @@ while running:
                 running = False
             if event.key == K_RIGHT:
                 algo.step()
-                current_circle_radius = 0
-            if event.key == K_LEFT:
-                algo.unstep()
-                current_circle_radius = 0
 
     # Draw text
     if algo.phase == PHASE_IMPROVE or algo.phase == PHASE_DONE:
@@ -66,37 +62,13 @@ while running:
         window.blit(text_surface, (10, 10))
 
     # Draw the tour
-    tour = algo.tour 
-    for i in range(len(tour)-2):
-        pygame.draw.line(window, line_color, points[tour[i]], points[tour[i+1]], 3) 
-    if len(tour) > 1 and current_circle_radius == max_radius:
-        pygame.draw.line(window, line_color, points[tour[-2]], points[tour[-1]], 3) 
-    if len(tour) == len(points)+1:
-        pygame.draw.line(window, line_color, points[tour[-2]], points[tour[-1]], 3) 
+    for (p, q) in algo.edges:
+        pygame.draw.line(window, line_color, p, q, 3) 
 
     # Draw the points as circles
     for i in range(len(points)):
         point = points[i]
-        if i in tour[:-1]:
-            pygame.draw.circle(window, primary, point, radius)
-        elif i == tour[-1] and current_circle_radius == max_radius:
-            pygame.draw.circle(window, primary, point, radius)
-        elif i == tour[0]:
-            pygame.draw.circle(window, primary, point, radius)
-        else: 
-            pygame.draw.circle(window, secondary, point, radius)
-
-    # Draw an expanding circle around the current point
-    if algo.phase == PHASE_NEAREST_NEIGHBOR and len(tour) > 1:
-        circle_surface = pygame.Surface((width, height), pygame.SRCALPHA)
-        if len(tour) < len(points)+1:
-            max_radius = distance(points[tour[-2]], points[tour[-1]])
-        if current_circle_radius < max_radius:
-            current_circle_radius += 5
-            if current_circle_radius > max_radius:
-                current_circle_radius = max_radius
-        pygame.draw.circle(circle_surface, NEIGHBOR_CIRCLE_COLOR , points[tour[-2]], current_circle_radius)
-        window.blit(circle_surface, (0, 0))
+        pygame.draw.circle(window, secondary, point, radius)
 
     # Update the display
     pygame.display.flip()
