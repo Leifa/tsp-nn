@@ -28,7 +28,7 @@ font = pygame.font.Font(None, 30)
 
 # List of points
 points = []
-for i in range(10):
+for i in range(50):
     point = (random.randint(100, width-100), random.randint(100, height-100))
     points.append(point)
 #points = [(110, 120), (400, 510), (600, 550), (900, 600), (630, 42)]
@@ -41,7 +41,7 @@ tour = nearest_neighbor.get_tour()
 twoopt = None
 
 # Circle radius
-radius = 8
+radius = 6
 current_circle_radius = 0
 max_radius = 20
 
@@ -88,11 +88,11 @@ while running:
 
     # Draw the tour
     for i in range(len(tour)-2):
-        pygame.draw.line(window, line_color, points[tour[i]], points[tour[i+1]], 3) 
+        pygame.draw.line(window, line_color, points[tour[i]], points[tour[i+1]], 2) 
     if len(tour) > 1 and current_circle_radius == max_radius:
-        pygame.draw.line(window, line_color, points[tour[-2]], points[tour[-1]], 3) 
+        pygame.draw.line(window, line_color, points[tour[-2]], points[tour[-1]], 2) 
     if len(tour) == len(points)+1:
-        pygame.draw.line(window, line_color, points[tour[-2]], points[tour[-1]], 3) 
+        pygame.draw.line(window, line_color, points[tour[-2]], points[tour[-1]], 2) 
 
     # Draw the points as circles
     for i in range(len(points)):
