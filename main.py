@@ -2,7 +2,9 @@ import pygame
 import math
 from pygame.locals import *
 import random
-from algo import *
+from instance import Instance
+from nearest_neighbor import NearestNeighbor 
+from twoopt import TwoOpt
 
 # Initialize pygame
 pygame.display.init()
@@ -26,12 +28,17 @@ font = pygame.font.Font(None, 30)
 
 # List of points
 points = []
-for i in range(130):
+for i in range(10):
     point = (random.randint(100, width-100), random.randint(100, height-100))
     points.append(point)
 #points = [(110, 120), (400, 510), (600, 550), (900, 600), (630, 42)]
 
-algo = Algo(points)
+instance = Instance(points)
+
+phase = 0
+nearest_neighbor = NearestNeighbor(instance)
+tour = nearest_neighbor.get_tour()
+twoopt = None
 
 # Circle radius
 radius = 8
@@ -44,7 +51,7 @@ running = True
 while running:
     # Clear the screen
     window.fill(background_color)
-#    algo.step()
+
     # Check for events
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -53,20 +60,33 @@ while running:
             if event.key == K_ESCAPE:
                 running = False
             if event.key == K_RIGHT:
-                algo.step()
-                current_circle_radius = 0
+                if phase == 0:
+                    nearest_neighbor.step()
+                    current_circle_radius = 0
+                    if nearest_neighbor.is_done():
+                        phase = 1
+                        twoopt = TwoOpt(instance, tour)
+                elif phase == 1:
+                    twoopt.step()
+                    if twoopt.is_done():
+                        phase = 2
             if event.key == K_LEFT:
-                algo.unstep()
-                current_circle_radius = 0
+                if phase == 2:
+                    phase = 1
+                if phase == 1:
+                    if not twoopt.unstep():
+                        phase = 0
+                if phase == 0:
+                    nearest_neighbor.unstep()
+                    current_circle_radius = 0
 
     # Draw text
-    if algo.phase == PHASE_IMPROVE or algo.phase == PHASE_DONE:
-        current_distance = algo.get_tour_distance()
+    if phase >= 1:
+        current_distance = instance.get_tour_distance(tour)
         text_surface = font.render(f"Distance: {current_distance:.2f}", True, (255, 255, 255))
         window.blit(text_surface, (10, 10))
 
     # Draw the tour
-    tour = algo.tour 
     for i in range(len(tour)-2):
         pygame.draw.line(window, line_color, points[tour[i]], points[tour[i+1]], 3) 
     if len(tour) > 1 and current_circle_radius == max_radius:
@@ -87,10 +107,10 @@ while running:
             pygame.draw.circle(window, secondary, point, radius)
 
     # Draw an expanding circle around the current point
-    if algo.phase == PHASE_NEAREST_NEIGHBOR and len(tour) > 1:
+    if phase == 0 and len(tour) > 1:
         circle_surface = pygame.Surface((width, height), pygame.SRCALPHA)
         if len(tour) < len(points)+1:
-            max_radius = distance(points[tour[-2]], points[tour[-1]])
+            max_radius = instance.get_dist(tour[-2], tour[-1])
         if current_circle_radius < max_radius:
             current_circle_radius += 5
             if current_circle_radius > max_radius:
