@@ -26,7 +26,7 @@ font = pygame.font.Font(None, 30)
 
 # List of points
 points = []
-for i in range(10):
+for i in range(40):
     point = (random.randint(100, width-100), random.randint(100, height-100))
     points.append(point)
 #points = [(110, 120), (400, 510), (600, 550), (900, 600), (630, 42)]

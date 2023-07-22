@@ -36,15 +36,11 @@ class Algo:
             self.step_min()
 
     def step_min(self):
-        print(self.concomp)
-        print(self.degree)
         if len(self.concomp) == 1:
             nodes_with_degree_one = []
             for key, value in self.degree.items():
-                print(f"{key}: {value}")
                 if value == 1:
                     nodes_with_degree_one.append(key)
-                print(nodes_with_degree_one)
             p = nodes_with_degree_one[0]
             q = nodes_with_degree_one[1]
             self.edges.append((p, q))
